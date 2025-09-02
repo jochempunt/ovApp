@@ -1,0 +1,22 @@
+{
+  "semi": true,
+  "singleQuote": false,
+  "jsxSingleQuote": false,
+  "trailingComma": "all",
+  "tabWidth": 2,
+  "useTabs": false,
+  "printWidth": 100,
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "endOfLine": "lf",
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "options": {
+        "parser": "typescript"
+      }
+    }
+  ],
+  "arrowParens": "always",
+  "htmlFormatExtraLiners": "head, body, /html"
+}
