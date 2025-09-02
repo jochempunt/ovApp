@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/ovapi/:path*",
-      "destination": "https://v0.ovapi.nl/:path*"
+      "source": "/ovapi/(.*)",
+      "destination": "https://v0.ovapi.nl/$1"
     }
   ]
 }
