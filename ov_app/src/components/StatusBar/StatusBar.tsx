@@ -14,7 +14,12 @@ export default function StatusBar({ status, stop, error }: StatusBarProps) {
         <Typography variant="h5" gutterBottom>
           {stop?.TimingPointName ? (
             <>
-              Departures: <b>{stop.TimingPointName}</b> <small>({stop.TimingPointTown})</small>
+              Departures: <b>{stop.TimingPointName}</b>{" "}
+              {stop.TimingPointName.includes(stop.TimingPointTown ?? "") ? (
+                ""
+              ) : (
+                <>({stop.TimingPointTown})</>
+              )}
             </>
           ) : (
             "Stop not found"

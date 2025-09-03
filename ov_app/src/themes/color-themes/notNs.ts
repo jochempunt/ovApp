@@ -97,17 +97,13 @@ export default createTheme({
     MuiTypography: {
       styleOverrides: {
         h5: ({ theme }) => ({
-          color: theme.palette.text.primary,
-          display: "flex",
-          alignItems: "center",
-          gap: theme.spacing(1),
-
           "&::after": {
             content: '""',
             flex: 1,
             height: 1,
             borderRadius: 2,
             backgroundColor: theme.palette.primary.main,
+            display: { xs: "none", sm: "block" },
           },
         }),
       },

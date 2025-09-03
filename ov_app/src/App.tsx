@@ -42,7 +42,7 @@ export default function App() {
 
   return (
     <>
-      <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Container maxWidth="sm" sx={{ py: 4, mx: "auto" }}>
         {/* --- HEADER --- */}
         <Box
           sx={{
