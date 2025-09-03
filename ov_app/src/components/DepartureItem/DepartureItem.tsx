@@ -22,6 +22,9 @@ export default function DepartureItem({ pass }: Props) {
         py: 1,
         px: 2,
         display: "flex",
+        minHeight: 90,
+        maxHeight: 90,
+        minWidth: 250,
       })}
     >
       <ListItemText
