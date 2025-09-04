@@ -14,6 +14,8 @@ export type Stop = {
   TimingPointName?: string;
   TimingPointTown?: string;
   StopAreaCode?: string;
+  Latitude?: number;
+  Longitude?: number;
 };
 
 export type StopArea = Record<string, TimingPoint>;

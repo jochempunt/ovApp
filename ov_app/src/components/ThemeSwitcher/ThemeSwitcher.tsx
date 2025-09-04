@@ -49,6 +49,8 @@ export default function ThemeSwitcher() {
           Dark ───
         </ListSubheader>
         <MenuItem value="dark">Dark</MenuItem>
+        <MenuItem value="aurora">Aurora</MenuItem>
+        <MenuItem value="notArriva">not Arriva</MenuItem>
       </Select>
     </FormControl>
   );

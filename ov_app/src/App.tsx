@@ -3,13 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchDepartures } from "./services/ovAPI";
 import type { OVResponse } from "./types/ovApi.types";
 import DepartureList from "./components/DepartureList/DepartureList";
-import { parseDepartures, parseStop } from "./utils/parsers";
+import { parseDeparturesAll, parseStopFromAnyTP } from "./utils/parsers";
 import { useEffect, useMemo, useState } from "react";
 import StatusBar from "./components/StatusBar/StatusBar";
 import RefreshFooter from "./components/RefreshFooter/RefreshFooter";
 import SearchBar from "./components/SearchBar/SearchBar";
 import ThemeSwitcher from "./components/ThemeSwitcher/ThemeSwitcher";
 import Clock from "./components/Clock/Clock";
+import { useStopAreasQuery } from "./hooks/useStopAreaQuery";
 
 export default function App() {
   const [stopCode, setStopCode] = useState(() => {
@@ -19,6 +20,23 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("stopCode", stopCode);
   }, [stopCode]);
+
+
+  const {
+    data: stopAreasData,
+    isLoading: isStopsLoading,
+    isError: isStopsError,
+  } = useStopAreasQuery();
+
+
+  useEffect(() => {
+    if (stopAreasData) {
+      console.log("StopAreas loaded:", {
+        count: stopAreasData.index.length,
+        sample: stopAreasData.index.slice(0, 5),
+      });
+    }
+  }, [stopAreasData]);
 
   const { data, error, status, refetch, dataUpdatedAt, isFetching } = useQuery<OVResponse, Error>({
     queryKey: ["departures", stopCode],
@@ -30,9 +48,8 @@ export default function App() {
     staleTime: 30_000,
   });
 
-  const stop = data ? parseStop(data) : undefined;
-
-  const departures = useMemo(() => parseDepartures(data, 5), [data]);
+  const stop = data ? parseStopFromAnyTP(data) : undefined;
+  const departures = useMemo(() => parseDeparturesAll(data, 5), [data]);
 
   useEffect(() => {
     document.title = stop
@@ -42,7 +59,7 @@ export default function App() {
 
   return (
     <>
-      <Container maxWidth="sm" sx={{ py: 4, mx: "auto" }}>
+      <Container maxWidth="md" sx={{ py: 4, mx: "auto" }}>
         {/* --- HEADER --- */}
         <Box
           sx={{

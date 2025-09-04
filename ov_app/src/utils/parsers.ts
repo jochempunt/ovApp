@@ -1,41 +1,27 @@
-import type { OVResponse, Stop, OVPass } from "../types/ovApi.types";
+import type { OVResponse, OVPass, Stop } from "../types/ovApi.types";
 
-export function parseDepartures(data?: OVResponse, amount: number = 5): OVPass[] {
+export function parseDeparturesAll(data?: OVResponse, amount = 5): OVPass[] {
   if (!data) return [];
+  const area = Object.values(data)[0];
+  if (!area) return [];
 
-  // take first stopArea
-  const stopArea = Object.values(data)[0];
-  if (!stopArea) return [];
+  const all: OVPass[] = [];
+  for (const tp of Object.values(area)) {
+    const passes = tp?.Passes ? (Object.values(tp.Passes) as OVPass[]) : [];
+    for (const p of passes) {
+      if (p?.ExpectedDepartureTime) all.push(p);
+    }
+  }
 
-  // take first timingPoint
-  const timingPoint = Object.values(stopArea).find(
-    (tp) => tp?.Passes && Object.keys(tp.Passes).length > 0,
-  );
-
-  if (!timingPoint) return [];
-
-  // extract passes
-  const passesObj = timingPoint.Passes ?? {};
-  const departures = Object.values(passesObj)
-    .filter((p): p is OVPass => Boolean(p?.ExpectedDepartureTime))
+  return all
     .sort((a, b) => (a.ExpectedDepartureTime ?? "").localeCompare(b.ExpectedDepartureTime ?? ""))
     .slice(0, amount);
-
-  return departures;
 }
 
-export function parseStop(data?: OVResponse): Stop | undefined {
+export function parseStopFromAnyTP(data?: OVResponse): Stop | undefined {
   if (!data) return {};
-
-  // take first stopArea
-  const stopArea = Object.values(data)[0];
-  if (!stopArea) return {};
-
-  // take first timingPoint
-  const timingPoint = Object.values(stopArea).find(
-    (tp) => tp?.Passes && Object.keys(tp.Passes).length > 0,
-  );
-  if (!timingPoint) return {};
-
-  return timingPoint.Stop ?? {};
+  const area = Object.values(data)[0];
+  if (!area) return {};
+  const anyTp = Object.values(area).find((tp) => tp?.Stop) ?? Object.values(area)[0];
+  return anyTp?.Stop ?? {};
 }
