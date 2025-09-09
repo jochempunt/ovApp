@@ -24,7 +24,7 @@ export default createTheme({
     // Custom surfaces to build list cards etc.
     surface: {
       main: "#2F1E73", // card base
-      alt: "#f8f6ffff", // input/menu base
+      alt: "#3b2b7cff", // input/menu base
     },
   },
 
@@ -70,7 +70,7 @@ export default createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: ({ theme }) => ({
-          backgroundColor: theme.palette.surface.alt,
+          backgroundColor: "#FFFFFF",
           borderRadius: theme.shape.borderRadius,
           color: theme.palette.surface.main,
           "& fieldset": { borderColor: theme.palette.divider },

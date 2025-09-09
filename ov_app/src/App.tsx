@@ -7,27 +7,28 @@ import { parseDeparturesAll, parseStopFromAnyTP } from "./utils/parsers";
 import { useEffect, useMemo, useState } from "react";
 import StatusBar from "./components/StatusBar/StatusBar";
 import RefreshFooter from "./components/RefreshFooter/RefreshFooter";
-import SearchBar from "./components/SearchBar/SearchBar";
 import ThemeSwitcher from "./components/ThemeSwitcher/ThemeSwitcher";
 import Clock from "./components/Clock/Clock";
 import { useStopAreasQuery } from "./hooks/useStopAreaQuery";
+import NewSearchBar from "./components/SearchBar/NewSearchBar";
+import type { StopAreaItem } from "./hooks/useStopAreaQuery";
 
 export default function App() {
   const [stopCode, setStopCode] = useState(() => {
     return localStorage.getItem("stopCode") || "MttAca";
   });
 
+  const [selectedStop, setSelectedStop] = useState<StopAreaItem | null>(null);
+
   useEffect(() => {
     localStorage.setItem("stopCode", stopCode);
   }, [stopCode]);
-
 
   const {
     data: stopAreasData,
     isLoading: isStopsLoading,
     isError: isStopsError,
   } = useStopAreasQuery();
-
 
   useEffect(() => {
     if (stopAreasData) {
@@ -51,11 +52,27 @@ export default function App() {
   const stop = data ? parseStopFromAnyTP(data) : undefined;
   const departures = useMemo(() => parseDeparturesAll(data, 5), [data]);
 
+  const displayStop = useMemo(() => {
+    return selectedStop || (stop ? {
+      name: stop.TimingPointName,
+      town: stop.TimingPointTown,
+      code: stopCode
+    } : null);
+  }, [selectedStop, stop, stopCode]);
+
   useEffect(() => {
-    document.title = stop
-      ? `Departures: ${stop.TimingPointName + " " + stop?.TimingPointTown}`
+    document.title = displayStop
+      ? `Departures: ${displayStop.name}${displayStop.town ? ` (${displayStop.town})` : ""}`
       : "Stop not found";
-  }, [stop]);
+  }, [displayStop]);
+
+  const handleStopCodeChange = (newStopCode: string, newSelectedStop: StopAreaItem) => {
+    setSelectedStop(newSelectedStop);
+    setStopCode(newStopCode);
+  };
+
+
+  const isLoadingDepartures = isFetching && selectedStop && stopCode === selectedStop.code;
 
   return (
     <>
@@ -72,14 +89,30 @@ export default function App() {
           <ThemeSwitcher />
           <Clock />
         </Box>
+
         {/* --- BODY --- */}
-        <SearchBar stopCode={stopCode} onChangeStop={setStopCode} />
-        <StatusBar status={status} stop={stop} error={error} />
-        {departures.length > 0 ? (
+        <NewSearchBar
+          allStopAreads={stopAreasData?.index}
+          setStopCode={handleStopCodeChange}
+        />
+
+        <StatusBar
+          status={status}
+          stop={displayStop}
+          error={error}
+          isLoadingDepartures={isLoadingDepartures}
+        />
+
+        {isLoadingDepartures ? (
+          <Typography color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+            Loading departures...
+          </Typography>
+        ) : departures.length > 0 ? (
           <DepartureList departures={departures} />
         ) : (
           <Typography>No upcoming departures</Typography>
         )}
+
         {/* --- FOOTER --- */}
         <RefreshFooter refetch={refetch} dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} />
       </Container>

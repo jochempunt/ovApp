@@ -1,24 +1,40 @@
 import { Typography } from "@mui/material";
-import type { Stop } from "../../types/ovApi.types";
 
 type StatusBarProps = {
   status: "idle" | "pending" | "success" | "error";
-  stop?: Stop;
+  stop?: {
+    name: string,
+    town: string,
+    code: string
+  } | null;
   error?: Error | null;
+  isLoadingDepartures?: boolean;
 };
 
-export default function StatusBar({ status, stop, error }: StatusBarProps) {
+export default function StatusBar({ status, stop, error, isLoadingDepartures }: StatusBarProps) {
+  // Show loading state if we're fetching departures for a selected stop
+  if (isLoadingDepartures && stop) {
+    return (
+      <Typography variant="h5" gutterBottom>
+        Departures: <b>{stop.name}</b>{" "}
+        {stop.name && !stop.name.includes(stop.town) && <>({stop.town})</>}
+        {" - "}
+        <Typography component="span" color="text.secondary">
+          Loading...
+        </Typography>
+      </Typography>
+    );
+  }
+
   switch (status) {
     case "success":
       return (
         <Typography variant="h5" gutterBottom>
-          {stop?.TimingPointName ? (
+          {stop ? (
             <>
-              Departures: <b>{stop.TimingPointName}</b>{" "}
-              {stop.TimingPointName.includes(stop.TimingPointTown ?? "") ? (
-                ""
-              ) : (
-                <>({stop.TimingPointTown})</>
+              Departures: <b>{stop.name}</b>{" "}
+              {stop.town && !stop.name.includes(stop.town) && (
+                <>({stop.town})</>
               )}
             </>
           ) : (
@@ -26,24 +42,18 @@ export default function StatusBar({ status, stop, error }: StatusBarProps) {
           )}
         </Typography>
       );
-      break;
-
     case "error":
       return (
         <Typography variant="h5" gutterBottom>
           Error: <b>{error?.message ?? "Error fetching departures"}</b>
         </Typography>
       );
-      break;
-
     case "pending":
       return (
         <Typography variant="h5" gutterBottom>
           Loading departures...
         </Typography>
       );
-      break;
-
     default:
       return null;
   }
