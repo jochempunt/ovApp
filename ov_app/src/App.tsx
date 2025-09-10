@@ -13,10 +13,14 @@ import { useStopAreasQuery } from "./hooks/useStopAreaQuery";
 import NewSearchBar from "./components/SearchBar/NewSearchBar";
 import type { StopAreaItem } from "./hooks/useStopAreaQuery";
 
+
 export default function App() {
   const [stopCode, setStopCode] = useState(() => {
     return localStorage.getItem("stopCode") || "MttAca";
   });
+
+
+
 
   const [selectedStop, setSelectedStop] = useState<StopAreaItem | null>(null);
 
@@ -26,8 +30,6 @@ export default function App() {
 
   const {
     data: stopAreasData,
-    isLoading: isStopsLoading,
-    isError: isStopsError,
   } = useStopAreasQuery();
 
   useEffect(() => {
@@ -103,14 +105,12 @@ export default function App() {
           isLoadingDepartures={isLoadingDepartures}
         />
 
-        {isLoadingDepartures ? (
-          <Typography color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-            Loading departures...
-          </Typography>
-        ) : departures.length > 0 ? (
+        {departures.length > 0 ? (
           <DepartureList departures={departures} />
         ) : (
-          <Typography>No upcoming departures</Typography>
+          <Typography>
+            {isLoadingDepartures ? 'Loading departures...' : 'No upcoming departures'}
+          </Typography>
         )}
 
         {/* --- FOOTER --- */}

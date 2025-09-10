@@ -2,13 +2,13 @@ import { Typography } from "@mui/material";
 
 type StatusBarProps = {
   status: "idle" | "pending" | "success" | "error";
-  stop?: {
-    name: string,
-    town: string,
-    code: string
+  stop: {
+    name: string | undefined,
+    town: string | undefined,
+    code: string | undefined
   } | null;
   error?: Error | null;
-  isLoadingDepartures?: boolean;
+  isLoadingDepartures: boolean | null;
 };
 
 export default function StatusBar({ status, stop, error, isLoadingDepartures }: StatusBarProps) {
@@ -17,8 +17,8 @@ export default function StatusBar({ status, stop, error, isLoadingDepartures }: 
     return (
       <Typography variant="h5" gutterBottom>
         Departures: <b>{stop.name}</b>{" "}
-        {stop.name && !stop.name.includes(stop.town) && <>({stop.town})</>}
-        {" - "}
+        {stop.name && !stop.name.includes(stop.town ?? "") && <>({stop.town})</>}
+        {"  "}
         <Typography component="span" color="text.secondary">
           Loading...
         </Typography>
@@ -29,11 +29,11 @@ export default function StatusBar({ status, stop, error, isLoadingDepartures }: 
   switch (status) {
     case "success":
       return (
-        <Typography variant="h5" gutterBottom>
+        <Typography variant="h5" component="h1" gutterBottom>
           {stop ? (
             <>
               Departures: <b>{stop.name}</b>{" "}
-              {stop.town && !stop.name.includes(stop.town) && (
+              {stop.town && !stop.name?.includes(stop.town) && (
                 <>({stop.town})</>
               )}
             </>
