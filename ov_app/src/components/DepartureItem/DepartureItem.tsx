@@ -43,7 +43,7 @@ export default function DepartureItem({ pass }: Props) {
         }
         secondary={
           <Typography variant="body2" color="text.secondary" className={styles.minutesUntil}>
-            {formatTime(pass.ExpectedDepartureTime)} ({minutesUntil(pass.ExpectedDepartureTime)}{" "}
+            {formatTime(pass.ExpectedDepartureTime)} ({"in " +minutesUntil(pass.ExpectedDepartureTime)}{" "}
             min)
           </Typography>
         }

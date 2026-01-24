@@ -1,13 +1,8 @@
-import { useEffect, useState } from "react";
 import { Typography } from "@mui/material";
+import { useNowTime } from "../../hooks/useNowTime";
 
 export default function Clock() {
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+  const now = useNowTime(1000);
 
   return (
     // Clock.tsx
@@ -21,7 +16,7 @@ export default function Clock() {
         color: t.palette.text.primary,
       })}
     >
-      {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+      {now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
     </Typography>
   );
 }
