@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Alert, Box, Container, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import { fetchDepartures } from "./services/ovAPI";
 import type { OVResponse } from "./types/ovApi.types";
@@ -12,21 +12,23 @@ import Clock from "./components/Clock/Clock";
 import { useStopAreasQuery } from "./hooks/useStopAreaQuery";
 import SearchBar from "./components/SearchBar/SearchBar";
 import { getInitialStop, readStopFromUrl, saveStopToStorage, writeStopToUrl } from "./utils/storage";
-
+import { useOnlineStatus } from "./hooks/onlineStatus";
+import ShareButton from "./components/ShareButton/ShareButton";
 
 export default function App() {
-
+  
   const [stopCode, setStopCode] = useState(() => getInitialStop());
-
+  const isOnline = useOnlineStatus(); 
+  
   const {
     data: stopAreasData,
   } = useStopAreasQuery();
-
+  
   const selectedStop = useMemo(() => {
     if (!stopAreasData?.index) return null;
     return stopAreasData.index.find(s => s.code.toLowerCase() === stopCode.toLowerCase()) ?? null;
   }, [stopAreasData, stopCode]);
-
+  
   useEffect(() => {
     if (stopAreasData) {
       console.log("StopAreas loaded:", {
@@ -35,7 +37,7 @@ export default function App() {
       });
     }
   }, [stopAreasData]);
-
+  
   useEffect(() => {
     const onPopState = () => {
       const fromUrl = readStopFromUrl();
@@ -47,21 +49,21 @@ export default function App() {
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
-
+  
   const { data, error, status, refetch, dataUpdatedAt, isFetching } = useQuery<OVResponse, Error>({
     queryKey: ["departures", stopCode],
     queryFn: () => fetchDepartures(stopCode),
-    refetchInterval: 30000,
+    refetchInterval: isOnline ? 30000 : false,
     enabled: !!stopCode.trim(),
-    placeholderData: (prev) => prev,
+    placeholderData: undefined,
     gcTime: 30 * 60 * 1000,
     staleTime: 30_000,
-    retry: 2, // Only retry twice when offline
+    retry: isOnline ? 2 : 0, 
   });
-
+  
   const stop = data ? parseStopFromAnyTP(data) : undefined;
   const departures = useMemo(() => parseDeparturesAll(data, 5), [data]);
-
+  
   const displayStop = useMemo(() => {
     return selectedStop || (stop ? {
       name: stop.TimingPointName,
@@ -69,61 +71,67 @@ export default function App() {
       code: stopCode
     } : null);
   }, [selectedStop, stop, stopCode]);
-
+  
   useEffect(() => {
     document.title = displayStop
-      ? `Departures: ${displayStop.name}${displayStop.town ? ` (${displayStop.town})` : ""}`
-      : "Stop not found";
+    ? `Departures: ${displayStop.name}${displayStop.town ? ` (${displayStop.town})` : ""}`
+    : "Stop not found";
   }, [displayStop]);
-
+  
   const handleStopCodeChange = (newStopCode: string) => {
-    setStopCode(newStopCode);
-    writeStopToUrl(newStopCode, "replace");
-    saveStopToStorage(newStopCode); // Save to localStorage
+    if(isOnline){
+      setStopCode(newStopCode);
+      writeStopToUrl(newStopCode, "replace");
+      saveStopToStorage(newStopCode); 
+    }
   };
-
+  
   const isLoadingDepartures = isFetching && !!stop;
-
+  
   return (
     <>
-      <Container maxWidth="md" sx={{ py: 4, mx: "auto" }}>
-        {/* --- HEADER --- */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mb: 2,
-          }}
-        >
-          <ThemeSwitcher />
-          <Clock />
-        </Box>
-
-        {/* --- BODY --- */}
-        <SearchBar
-          allStopAreads={stopAreasData?.index}
-          setStopCode={handleStopCodeChange}
-        />
-
-        <StatusBar
-          status={status}
-          stop={displayStop}
-          error={error}
-          isLoadingDepartures={isLoadingDepartures}
-        />
-
-        {departures.length > 0 ? (
-          <DepartureList departures={departures} />
-        ) : (
-          <Typography>
-            {isLoadingDepartures ? 'Loading departures...' : 'No upcoming departures'}
-          </Typography>
-        )}
-
-        {/* --- FOOTER --- */}
-        <RefreshFooter refetch={refetch} dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} />
-      </Container>
+    <Container maxWidth="md" sx={{ py: 4, mx: "auto" }}>
+    {/* --- HEADER --- */}
+    <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      mb: 2,
+    }}
+    >
+    <ThemeSwitcher />
+    <Clock />
+    </Box>
+    
+    {/* --- BODY --- */}
+    <SearchBar
+    allStopAreads={stopAreasData?.index}
+    setStopCode={handleStopCodeChange}
+    />
+    
+    <StatusBar
+    status={status}
+    stop={displayStop}
+    error={error}
+    isLoadingDepartures={isLoadingDepartures}
+    isOnline={isOnline}
+    />
+    
+    {departures.length > 0 ? (
+      <DepartureList departures={departures} />
+    ) : (
+      <Typography>
+      {isLoadingDepartures ? 'Loading departures...' : 'No upcoming departures'}
+      </Typography>
+    )}
+    
+    
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+    <RefreshFooter refetch={refetch} dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} />
+    <ShareButton stopName={displayStop?.name} stopCode={stopCode} />
+    </Box>
+    </Container>
     </>
   );
 }
