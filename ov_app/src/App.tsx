@@ -13,7 +13,7 @@ import { useStopAreasQuery } from "./hooks/useStopAreaQuery";
 import SearchBar from "./components/SearchBar/SearchBar";
 import { getInitialStop, readStopFromUrl, saveStopToStorage, writeStopToUrl } from "./utils/storage";
 import { useOnlineStatus } from "./hooks/onlineStatus";
-import ShareButton from "./components/ShareButton/ShareButton";
+
 
 export default function App() {
   
@@ -127,10 +127,13 @@ export default function App() {
     )}
     
     
-    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-    <RefreshFooter refetch={refetch} dataUpdatedAt={dataUpdatedAt} isFetching={isFetching} />
-    <ShareButton stopName={displayStop?.name} stopCode={stopCode} />
-    </Box>
+    <RefreshFooter 
+    refetch={refetch} 
+    dataUpdatedAt={dataUpdatedAt} 
+    isFetching={isFetching}
+    stopName={displayStop?.name}
+    stopCode={stopCode}
+    />
     </Container>
     </>
   );
