@@ -131,7 +131,7 @@ export default function App() {
     refetch={refetch} 
     dataUpdatedAt={dataUpdatedAt} 
     isFetching={isFetching}
-    stopName={displayStop?.name}
+    stopName={selectedStop?.name}
     stopCode={stopCode}
     />
     </Container>
