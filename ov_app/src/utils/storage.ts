@@ -42,7 +42,12 @@ export function getInitialStop(): string {
   if (fromUrl) return fromUrl;
   
   const fromStorage = readStopFromStorage();
-  if (fromStorage) return fromStorage;
+  if (fromStorage) {
+    writeStopToUrl(fromStorage, "replace");
+    return fromStorage;
+  }
   
-  return '09514'; 
+  const defaultStop = 'MttAca';
+  writeStopToUrl(defaultStop, "replace");
+  return defaultStop;
 }
