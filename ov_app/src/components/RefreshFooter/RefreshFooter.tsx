@@ -28,11 +28,12 @@ export default function RefreshFooter({
 
   const handleShare = async () => {
     const url = window.location.href;
-    const text = stopName ? `Live departures for ${stopName}` : 'Live transit departures';
+    const title = stopName ? `Live departures for ${stopName}` : 'Live transit departures';
+    const text = stopName ? `Track live departures for: ${stopName}` : null;
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: text, url });
+        await navigator.share({ title: title,text:text ?? undefined,  url });
         return;
       } catch (err) {
         if ((err as Error).name === 'AbortError') return;
